@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  * Rename request parameter
  *
  * @author Woody
- * @date 2020/11/10
  */
 @Documented
 @Target(ElementType.FIELD)
@@ -18,6 +17,8 @@ import java.lang.annotation.Target;
 public @interface Rename {
     /**
      * The name of the request parameter to bind to.
+     *
+     * @return A new name of parameter
      */
     String value();
 }

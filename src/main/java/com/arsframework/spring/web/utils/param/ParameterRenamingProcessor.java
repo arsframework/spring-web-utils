@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttribu
  * Method processor supports {@link Rename} parameters renaming
  *
  * @author Woody
- * @date 2020/11/10
  */
 public class ParameterRenamingProcessor extends ServletModelAttributeMethodProcessor {
     @Resource
