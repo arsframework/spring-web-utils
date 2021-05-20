@@ -7,13 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Resource;
-import javax.servlet.ServletRequest;
 
-import org.springframework.beans.MutablePropertyValues;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttributeMethodProcessor;
 
@@ -24,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttribu
  */
 public class ParameterRenamingProcessor extends ServletModelAttributeMethodProcessor {
     @Resource
-    private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
+    private ApplicationContext applicationContext;
 
     /**
      * A map caching annotation definitions of command objects
@@ -33,36 +31,6 @@ public class ParameterRenamingProcessor extends ServletModelAttributeMethodProce
 
     public ParameterRenamingProcessor() {
         super(true);
-    }
-
-    /**
-     * Convert the parameter name
-     */
-    private static final class ParameterDataBinder extends ExtendedServletRequestDataBinder {
-        /**
-         * The old and new name mappings
-         */
-        private final Map<String, String> renames;
-
-        public ParameterDataBinder(Object target, String objectName, Map<String, String> renames) {
-            super(target, objectName);
-            this.renames = renames == null ? Collections.emptyMap() : renames;
-        }
-
-        @Override
-        protected void addBindValues(MutablePropertyValues propertyValues, ServletRequest request) {
-            super.addBindValues(propertyValues, request);
-            this.renames.forEach((k, v) -> {
-                if (propertyValues.contains(k)) {
-                    propertyValues.add(v, propertyValues.getPropertyValue(k).getValue());
-                }
-            });
-            this.renames.forEach((k, v) -> {
-                if (!propertyValues.contains(k)) {
-                    propertyValues.removePropertyValue(v);
-                }
-            });
-        }
     }
 
     /**
@@ -86,7 +54,7 @@ public class ParameterRenamingProcessor extends ServletModelAttributeMethodProce
                 String name = rename == null ? null : rename.value();
                 if (name != null && !(name = name.trim()).isEmpty()
                         && renames.put(name, field.getName()) != null) {
-                    throw new RuntimeException("Duplicate parameter name: " + name);
+                    throw new IllegalStateException("Duplicate parameter name: " + name);
                 }
             }
             renames.putAll(this.getRenameMappings(clazz.getSuperclass()));
@@ -98,8 +66,13 @@ public class ParameterRenamingProcessor extends ServletModelAttributeMethodProce
     @Override
     protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
         Object target = binder.getTarget();
-        WebBindingInitializer initializer = this.requestMappingHandlerAdapter.getWebBindingInitializer();
-        if (target == null || initializer == null) {
+        if (target == null) {
+            return;
+        }
+        RequestMappingHandlerAdapter requestMappingHandlerAdapter =
+                this.applicationContext.getBean(RequestMappingHandlerAdapter.class);
+        WebBindingInitializer initializer = requestMappingHandlerAdapter.getWebBindingInitializer();
+        if (initializer == null) {
             return;
         }
         Map<String, String> mapping = this.getRenameMappings(target.getClass());

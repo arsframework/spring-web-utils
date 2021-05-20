@@ -1,5 +1,5 @@
 # spring-web-utils
-该插件基于Spring web提供工具包。
+该插件基于Spring web提供工具包，可使用[spring-web-utils-boot-starter]( https://github.com/arsframework/spring-web-utils-boot-starter ) 自动装配。
 
 ## 1 环境依赖
 - Java JDK1.8+
@@ -7,11 +7,11 @@
 ## 2 部署配置
 在Maven配置中添加如下依赖：
 ```
-<plugin>
+<dependency>
     <groupId>com.arsframework</groupId>
     <artifactId>spring-web-utils</artifactId>
-    <version>1.0.0</version>
-</plugin>
+    <version>1.0.1</version>
+</dependency>
 ```
 
 ## 3 功能描述
@@ -57,3 +57,5 @@ public void saveUser(UserSaveParam param) {
 }
 ```
 ## 4 版本更新日志
+### v1.0.1
+1. 修复```RequestMappingHandlerAdapter```循环引用的问题;

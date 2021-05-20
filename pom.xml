@@ -6,7 +6,7 @@
 
     <groupId>com.arsframework</groupId>
     <artifactId>spring-web-utils</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>spring-web-utils</name>
     <description>Spring web util</description>
